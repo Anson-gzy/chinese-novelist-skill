@@ -1,195 +1,264 @@
 ---
-name: chinese-novelist
+name: novelist-assistant
 description: |
-  分章节创作引人入胜的中文小说。支持各种题材（悬疑/言情/奇幻/科幻/历史等），支持10-50章长篇创作，每章3000-5000字，结尾设置悬念钩子。强调深度润色去除AI痕迹，确保文字自然流畅。
-  当用户要求：写小说、创作故事、分章节写作、连续剧情、章节悬念、长篇小说时使用。
+  A powerful novelist assistant for writing engaging, multi-chapter stories in English, Chinese, or other languages. Use this skill whenever a user asks to "write a novel", "create a story", "write chapters", or "help me write a long story". This skill excels at aligning the output's vocabulary and sentence complexity with specific user samples, planning intricate multi-chapter outlines with specific stopping points, and continuously writing chapter by chapter without losing track of character consistency or the overarching plot. Make sure to use this skill whenever a user wants to brainstorm, outline, or write a long-form narrative.
 metadata:
-  trigger: 创作中文小说、分章节故事、长篇小说创作
+  trigger: 创作小说、分章节故事、长篇小说创作、write a novel, generate a story, outline a book
   source: 基于小说创作最佳实践设计
 ---
 
-# Chinese Novelist: 中文小说创作助手
+# Novelist Assistant
 
-## 核心流程
+**CORE DIRECTIVE & PRINCIPLES (核心指令集与原则保留)**: 
+The original writing preferences, formatting rules, and stylistic principles (e.g., "Show, Don't Tell", character consistency, vocabulary constraints) hold the **highest priority**. The newly introduced Global Planning Engine serves to enhance and orchestrate these rules, not replace them. All global planning features act as an advanced wrapper or middleware surrounding the core drafting logic to ensure continuity over massive projects.
 
-### 第一阶段：5问确认
+This skill helps the user write a compelling, long-form novel by breaking the process down into manageable, structured stages. Writing a novel is tough because it's hard to maintain consistency and finish the project. We solve this by first carefully capturing the user's intent, then locking the planning pack, then drafting chapter by chapter with note-driven continuity, and finally running a raw-text review after all chapters are complete.
 
-**使用 AskUserQuestion 工具逐一询问用户，每个问题提供选项供用户选择。**
+## Core Workflow
+
+### Workflow Discipline
+
+Before executing any stage, reread `SKILL.md` from the top through the current stage and load the relevant reference templates for that stage. Planning must happen before drafting. Drafting must happen before final review. Do not skip forward or improvise a different order.
+
+### Stage 0: Project State Detection & Resume Gate
+
+Before asking the 7 questions or writing anything, detect whether the user is starting a brand-new novel or continuing an existing project. This check is mandatory.
+
+1. **Locate the target project state:**
+   - If the user explicitly names an existing novel folder, inspect that folder first.
+   - If the workspace already contains a clear matching novel project, prefer resuming it instead of restarting from scratch.
+   - Treat the numbered planning pack as canonical when present: `00-outline.md`, `01-characters.md`, `02-timeline.md`, `03-global-notes.md`.
+
+2. **Classify the project before choosing a workflow:**
+   - **New Project:** No planning pack exists. Proceed to Stage 1 and ask the 7 questions.
+   - **Planning Ready:** The planning pack exists but no chapter files exist yet. Do not restart ideation. Read the planning files, summarize them to the user, and continue from the confirmation gate.
+   - **Draft In Progress:** The planning pack exists and at least one `chapter-xx.md` or `chapter-xx-notes.md` exists, but the full book is not complete. Skip Stage 1. Resume from Stage 3.
+   - **Review Ready:** All planned chapters are complete. Skip Stage 1 and Stage 3. Go directly to Stage 4.
+   - **Broken / Partial State:** Some planning files or notes are missing, stale, or inconsistent. Repair the minimum required state before continuing.
+
+3. **Repair broken or partial project state before continuing:**
+   - If one or more planning files are missing, reconstruct the missing file from the existing planning pack, chapter notes, and chapter text before drafting the next chapter.
+   - If a previous chapter has raw prose but no notes, create or repair that `chapter-xx-notes.md` first so the next drafting step can remain notes-first.
+   - If notes exist but the corresponding chapter file is missing, treat that chapter as incomplete and resolve the gap before moving forward.
+   - If old and new filenames coexist (for example `timeline.md` plus `02-timeline.md`), normalize to the numbered planning pack and continue using only the numbered files as canonical references.
+
+4. **Resume conservatively:**
+   - When resuming drafting, do not ask the full 7 questions again unless critical intent is truly missing.
+   - Read the planning pack and the most relevant prior notes, determine the next actionable chapter, and continue from there.
+   - When resuming review, do not redraft chapters by default. Start from raw-text audit first.
+
+### Stage 1: Capture Intent (The 7 Questions)
+
+Use this stage only for a **brand-new project** or when the existing project is missing critical intent. Your goal is to understand exactly what the user wants to write and how they want it written. **Ask the user the following questions interactively, one by one**. Wait for their answer before asking the next question.
 
 ---
 
-**问题1：题材与风格**
-
+**Question 1: Language & Stylistic Baseline**
 ```
-Question: 你想要创作什么题材的小说？
+Question: 1/7 What language would you like the novel to be written in? (For English or other foreign languages, providing a short sample text is highly recommended so we can match the vocabulary level and sentence structure).
 Options:
-- 悬疑推理（侦探、破案、解谜）
-- 现代言情（都市、职场、恋爱）
-- 古代言情（宫廷、江湖、穿越）
-- 奇幻玄幻（魔法、异世界、修真）
-- 科幻未来（科技、太空、末世）
-- 武侠仙侠（江湖、门派、飞升）
-- 历史架空（朝堂、战争、权谋）
-- 都市现实（生活、成长、社会）
+- Chinese (中文)
+- English (Default style)
+- English (I will provide a sample text for vocabulary/syntax mapping)
+- Other Language
 ```
-
-用户选择后记录：`题材 = [用户选择]`
+*Why this matters:* We want to avoid generic "AI-sounding" text. If the user provides a sample text, carefully analyze its vocabulary size (e.g., CEFR level if applicable), formatting, and syntax complexity (e.g., sentence length, use of passive vs. active voice). Tell the user your analysis and record it as `Style Requirements = [Analysis Result]`. This ensures the final output feels authentic to the user's reading level.
 
 ---
 
-**问题2：主角设定**
-
+**Question 2: Genre & Vibe**
 ```
-Question: 主角是什么设定？
+Question: 2/7 What is the genre or setting of the novel?
 Options:
-- 男性主角（独角戏）
-- 女性主角（独角戏）
-- 双主角（男女双线）
-- 群像戏（多线叙事）
+- Mystery/Detective
+- Modern/Urban Romance
+- Fantasy/Magic/Cultivation
+- Sci-Fi/Cyberpunk
+- Historical/Alternate History
+- Slice of Life/Realistic
 ```
-
-用户选择后，如需进一步询问职业/身份，继续追问。
-
-记录：`主角 = [用户选择]` + `职业/身份 = [用户回答]`
+Record: `Genre = [User Choice]`
 
 ---
 
-**问题3：主角性格**
-
+**Question 3: Protagonist Setup**
 ```
-Question: 主角的核心性格是？
+Question: 3/7 What is the protagonist setup?
 Options:
-- 热血正义（积极、勇敢、有担当）
-- 冷静智慧（理性、谋略、高智商）
-- 温暖治愈（善良、温柔、有同理心）
-- 高冷孤傲（冷漠、独立、强大）
-- 阴暗腹黑（心机、算计、复仇）
-- 成长逆袭（从弱到强、打脸升级）
+- Sole Male Protagonist
+- Sole Female Protagonist
+- Dual Protagonists (e.g., Romance)
+- Ensemble Cast
 ```
-
-记录：`性格 = [用户选择]`
+If useful, briefly ask about their core profession or identity to deepen the context.
+Record: `Protagonist = [User Choice]`
 
 ---
 
-**问题4：核心冲突**
-
+**Question 4: Protagonist Personality**
 ```
-Question: 小说的核心冲突是什么？
+Question: 4/7 What is the protagonist's core personality?
 Options:
-- 生死存亡（生存危机、逃出生天）
-- 查明真相（寻找答案、揭露秘密）
-- 爱情阻碍（追求真爱、克服阻碍）
-- 复仇雪恨（复仇计划、伸张正义）
-- 权力争夺（竞争上位、资源争夺）
-- 成长突破（自我突破、实现价值）
-- 守护保护（守护重要的人或事）
+- Brave & Righteous
+- Calm & Strategic
+- Warm & Healing
+- Cold & Independent
+- Cunning & Vengeful
+- Underdog seeking Growth
 ```
-
-记录：`核心冲突 = [用户选择]`
+Record: `Personality = [User Choice]`
 
 ---
 
-**问题5：章节数量**
-
+**Question 5: Core Conflict**
 ```
-Question: 你计划创作多少章？
+Question: 5/7 What is the driving conflict of the story?
 Options:
-- 10章（短篇，约3-5万字）
-- 15章（中短篇，约4.5-7.5万字）
-- 20章（中篇，约6-10万字）
-- 30章（中长篇，约9-15万字）
-- 50章（长篇，约15-25万字）
-- 自定义（输入具体章节数）
+- Survival (Life or Death)
+- Uncovering a Mystery/Truth
+- Forbidden/Challenged Pursuit of Love
+- Revenge
+- Power Struggle/Politics
+- Personal Growth/Overcoming Limits
+- Protecting loved ones
 ```
-
-记录：`章节数 = [用户选择]`
-
----
-
-**5问收集完成后**然后进入"第二阶段：规划"。
+Record: `Conflict = [User Choice]`
 
 ---
 
-### 第二阶段：规划 + 二次确认
-
-执行以下步骤：
-
-1. **创建项目文件夹**：`novels/[小说名称]/`
-2. **生成大纲**：创建 `00-大纲.md`，使用 `references/outline-template.md` 模板，填入完整的章节规划
-3. **生成人物档案**：创建 `01-人物档案.md`，使用 `references/character-template.md` 模板，创建主角、反派、配角档案
-
-完成后，向用户展示规划摘要并请求确认，等待用户确认。用户同意后，进入"第三阶段：疯狂创作"。
-
----
-
-### 第三阶段：疯狂创作
-
-**重要：全程无需再次向用户确认，必须逐一章创作**
-
-按顺序逐章创作，每章执行完整的创作流程（见下方"逐章创作"），完成一章后自动继续下一章，直到所有章节完成。
-
----
-
-## 疯狂创作——逐章创作流程
-
-每章创作时严格执行以下步骤：
-
-#### 1. 写前分析
-
-1. 读取 `00-大纲.md` - 查看TODO list和已完成章节的摘要
-2. 读取 `00-大纲.md` 中上一章的摘要
-3. 更新`00-大纲.md` 中 TODO list - 将本章标记为"进行中"
-4. 设计开头钩子 - **最关键**：前20%必须有即时冲突 → [chapter-guide.md](references/chapter-guide.md)（10种开头技巧）
-5. 规划场景 - 确定本章需要3-5个场景
-
-#### 2. 撰写
-
-6. 创建章节文件 - 使用`references/chapter-template.md` 模板
-7. 撰写正文 - **每章必须达到3000-5000字**
-   - 开头检查：前20%是否极其吸引人？
-   - 对话规范 → [dialogue-writing.md](references/dialogue-writing.md)
-   - 内容不足？使用 [content-expansion.md](references/content-expansion.md) 扩充技巧
-8. 设置结尾钩子 → [hook-techniques.md](references/hook-techniques.md)（10种钩子类型）
-9. **字数检查** - 必须使用脚本检查字数：`python scripts/check_chapter_wordcount.py <章节文件路径>` 低于3000字必须使用扩充技巧重写
-
-#### 3. 撰写后优化
-
-10. 连贯性检查 → [consistency.md](references/consistency.md) - 人物一致性、情节连贯、节奏控制
-11. **深度润色（去除AI味）** - 重点检查并修改：
-    - **去除过度修饰的形容词**：删减"璀璨"、"瑰丽"、"绚烂"等AI常用词堆砌
-    - **减少抽象陈述**：把"心中涌起复杂的情感"改为具体动作/对话
-    - **打破四字格律**：避免"心潮澎湃、热血沸腾"等陈词滥调
-    - **增加口语化表达**：人物对话要有个性，避免"书面语套话"
-    - **优化节奏感**：长句和短句交替，避免句式单调
-    - **细节具象化**：用具体的视觉/听觉/嗅觉细节替代笼统描述
-12. **字数检查** - 必须使用脚本检查字数：`python scripts/check_chapter_wordcount.py <章节文件路径>` 低于3000字必须使用扩充技巧重写
-
-#### 4. 最后收尾
-
-13. 生成章节摘要 - 在 `00-大纲.md` 添加摘要（300-500字）
-14. 更新状态 - `00-大纲.md` 中 TODO list - 将本章标记为"完成"
-
----
-
-## 三大黄金法则
-
-1. **展示而非讲述** - 用动作和对话表现，不要直接陈述
-2. **冲突驱动剧情** - 每章必须有冲突或转折
-3. **悬念承上启下** - 每章结尾必须留下钩子
-
-### 字数检查脚本
-
-使用 `scripts/check_chapter_wordcount.py` 检查章节字数：
-
-```bash
-# 检查单个章节
-python scripts/check_chapter_wordcount.py novels/小说名/第01章.md
-
-# 检查所有章节
-python scripts/check_chapter_wordcount.py --all novels/小说名/
-
-# 自定义最小字数
-python scripts/check_chapter_wordcount.py novels/小说名/第01章.md 3500
+**Question 6: Total Chapter Count**
 ```
+Question: 6/7 How many chapters do you plan for the whole story?
+Options:
+- 10 chapters (Short story)
+- 15 chapters (Novelette)
+- 20 chapters (Novella)
+- 30 chapters (Standard Novel)
+- 50 chapters (Long Novel)
+- Custom number
+```
+Record: `Total Chapters = [User Choice]`
 
-低于3000字的章节必须使用 [content-expansion.md](references/content-expansion.md) 的扩充技巧进行扩充。
+---
+
+**Question 7: Generation Constraints**
+```
+Question: 7/7 For this current writing session, how much do you want me to write?
+Options:
+- Write the entire story automatically.
+- Write up to a specific chapter (e.g., "Stop after Chapter 5").
+- Write up to a specific plot point (e.g., "Stop after the hero finds the magic sword").
+```
+Record: `Generation Scope = [User Choice]`
+
+---
+
+### Stage 2: Global Planning Generation (全局总规划生成协议)
+
+Once intent is captured, do the initial heavy lifting of organizing the story structure so the user has a roadmap.
+Create the project folder: `novels/[Novel Name]/`.
+
+If Stage 0 determined that a valid planning pack already exists, reuse and repair that pack instead of regenerating it from scratch unless the user explicitly asks for replanning.
+
+Before any chapter is written, you must finish the numbered planning pack:
+- `00-outline.md`
+- `01-characters.md`
+- `02-timeline.md`
+- `03-global-notes.md`
+
+1. **Calculate the Stopping Point:**
+   - If the user requested to stop at a *specific plot point*, figure out which chapter that plot point occurs in based on the expected pacing.
+   - Record exactly when you must stop writing as the `Generation Limit = Chapter X` (or All Chapters).
+
+2. **Draft the Global Plan (`00-outline.md`):** Do not just create a simple synopsis. You must generate a highly detailed **Global Plan** containing ALL chapters. For *each* chapter, you MUST include:
+   - **Estimated word count**
+   - **POV character**
+   - **Core events and plot advancement**
+   - **Micro-psychological change nodes** for key characters
+   - **Foreshadowing list** (e.g., specific sensory details, lore mechanics, or hidden motives that need early planting)
+
+3. **Draft Character Bios (`01-characters.md`):** Use the `references/character-template.md` pattern. Flesh out the protagonist, antagonist, and key supporting cast.
+
+4. **Initialize the Story Timeline (`02-timeline.md`):** This file is mandatory for every novel project.
+   - Create `02-timeline.md` in the project folder using `references/timeline-template.md` as the base.
+   - Fill in the **全局时间线 (Global Timeline Table)**: for every chapter in the Global Plan, estimate its in-story **time node (D+N)** and **duration** (e.g., "D+1, about half a day"). This forms the planning-level timeline.
+   - Fill in the **时间约束承诺 (Planning Locks)** section: if any outline or character notes describe time windows (e.g., "the next steps happen within two days", "she arrives three days later"), record them here explicitly as locked constraints.
+   - **Timeline Conflict Pre-Check:** Before finalizing the plan, scan all planning entries and locks against each other. If a planned chapter's time window contradicts a lock, flag it as a conflict in the **冲突记录 (Conflict Log)** and adjust the plan to resolve it before confirming with the user.
+
+5. **Initialize Global Notes (`03-global-notes.md`):**
+   - Create `03-global-notes.md` in the project folder using `references/global-notes-template.md` as a base.
+   - Record any over-arching stylistic preferences, absolute lore boundaries, or specific characterization focus. This acts as a living document for persistent instructions across chapters.
+
+6. **Planning Completion Gate:** Do not draft `chapter-xx.md` until all four planning files exist, are internally consistent, and have been shown to the user for confirmation.
+
+**Crucial Checkpoint:**
+Show the user a high-level summary of the Global Plan, the character profiles, the recorded `Style Requirements`, the `Generation Limit`, the **initial timeline overview**, and the **global notes**. Ask for explicit confirmation before proceeding:
+*"Please review the global plan, timeline, and constraints. Say 'Confirm' to start the writing process, or suggest edits."*
+
+---
+
+### Stage 3: Chapter Drafting Loop
+
+Once explicitly confirmed, enter a continuous drafting state to sequentially write the chapters up to the `Generation Limit`. Do not pause to ask the user between chapters.
+
+**Default reading strategy during drafting:**
+- Read the planning pack: `00-outline.md`, `01-characters.md`, `02-timeline.md`, `03-global-notes.md`.
+- Read the most relevant prior `chapter-xx-notes.md` files for continuity.
+- Do **not** reread previous chapter prose by default while drafting the next chapter.
+- If notes are missing, too thin, or a contradiction cannot be resolved from notes, selectively inspect the minimum necessary raw chapter text.
+- If context becomes too large or the session risks timing out, fall back to the planning pack plus prior notes only. Notes are the primary continuity surface during drafting.
+
+For each chapter, iterate through these three workflow nodes in exact order:
+
+#### Node 1: Pre-Flight Routine (循环前置读取与预演算)
+- **Review the Planning Pack:** Proactively read `00-outline.md`, `01-characters.md`, `02-timeline.md`, and `03-global-notes.md`. Internalize all characterization, style, and lore constraints before drafting.
+- **Review Prior Notes, Not Prior Prose:** Read the relevant `chapter-xx-notes.md` files first to recover carry-over emotion, unresolved tension, timeline state, foreshadowing, and side-character activity. Only consult raw chapter text if the notes cannot answer a drafting-critical question.
+- **Extract Current Task:** Identify the core plot, required psychological shifts, and necessary foreshadowing for the *current* chapter.
+- **Bridge the Gap:** Explicitly note what emotional residue must carry over from the previous notes, what unresolved items must be continued now, and what clues must be planted for the next 2-3 chapters. Update the outline TODO list so the current chapter is marked "In Progress".
+- **Timeline Pre-Check (时间线预检):**
+  1. Read `02-timeline.md`. Note the **ending time state** of the previous chapter.
+  2. Determine the **permitted time window** for the current chapter by checking the 全局时间线 row, all active 时间约束承诺 (Planning Locks), and all 固定时间表与周期性事件 (Fixed Schedules).
+  3. If the planned time window would violate any Planning Lock, adjust the plan before writing. Do not silently write past a time constraint.
+- **Side Character Collision & Cooldown Check (配角出场演算):**
+  1. Check the current chapter's core plot, emotional purpose, scene location, and pacing needs first. Ask whether each side character has a **real narrative reason** to appear here.
+  2. Check the chapter setting against the **"常驻日程表 (Base Routine)"** of side characters in `01-characters.md`. If a routine intersects with this chapter, treat it as a strong opportunity for a natural appearance.
+  3. Check the **"Side Character Activity Tracker"** in `03-global-notes.md`. Distance from the current chapter is a strong priority signal. If a side character has not appeared in 3-4 chapters, actively look for a natural opening and include them whenever the chapter can absorb it without derailing the main beat.
+  4. Use a blended decision: **narrative necessity first, distance second, active ensemble texture always**. If a character is overdue but not central, prefer low-intrusion activity such as a brief in-person beat, group-chat message, secondhand mention, background action, or independent-life detail.
+  5. When scheduling their appearance or mention, draw from their **"日常待机动作库 (Idle Animations)"** so the appearance feels natural and non-intrusive.
+
+#### Node 2: Draft First, Notes Second (先写正文，再写备注)
+- **Draft the Chapter Content (`references/chapter-template.md`):** Write the chapter text into `chapter-xx.md`. This file must only contain the chapter title and the narrative text itself. A chapter should feel substantial and must follow the planning pack plus the note-derived carry-over.
+- **Enforce the Time Budget (时间线硬约束):** While drafting, all in-story events must stay within the **chapter time budget** defined in Node 1. If a scene would naturally push the story past the allowed time window, compress it, cut it, or move it to a future chapter.
+- **Enforce Global Notes & Side Characters:** Apply the rules from `03-global-notes.md`. Keep side characters active and non-stereotyped.
+- **Enforce the Style Requirements:** Reference the vocabulary and syntax limitations extracted in Question 1. Keep the narrative grounded and avoid generic AI-sounding text.
+- **Show, Don't Tell:** Use sensory details, vivid actions, and dialogue informed by `references/dialogue-writing.md`.
+- **End on a Suspenseful Hook:** Use `references/hook-techniques.md`.
+- **Draft the Chapter Notes (`references/chapter-notes-template.md`):** After the chapter is complete, create `chapter-xx-notes.md`. The loop order is fixed: **write one chapter first, then write its notes**.
+- **Make the Notes Self-Sufficient:** Each notes file must be strong enough to support the next chapter without reopening full prose. Record the core event, carry-over emotion, time anchors, appearing characters and their state, newly confirmed facts, foreshadowing added/resolved, unresolved tensions, and the handoff into the next chapter.
+
+#### Node 3: In-Loop Sync & Local QA (循环内校验与轻量同步)
+- **Check Character & Notes Consistency:** Verify character traits and logic using `references/consistency.md`. Check whether the new chapter and its notes remain aligned with `03-global-notes.md`.
+- **Wordcount Verification:** Run `python scripts/check_chapter_wordcount.py <chapter_file_path>`. If too short, expand it naturally using `references/content-expansion.md`.
+- **Timeline Verification (时间线校验):**
+  1. Identify every time-anchored expression in the just-written chapter.
+  2. Map each to its D+N value and check it against `02-timeline.md`, especially the previous chapter's ending time state and all active Planning Locks.
+  3. If any in-text time reference contradicts the timeline, fix it immediately in the chapter text or, if the plot genuinely requires more time, update the lock and propagate that change into the planning files.
+  4. Append any new timeline events, fixed schedules, or new Planning Locks introduced in this chapter to `02-timeline.md`.
+- **Lightweight State Sync:** Update `00-outline.md` with the chapter summary and status, update `02-timeline.md` with actual time details, update `03-global-notes.md` with any persistent new reminder, and update `01-characters.md` only when the chapter makes a new fact explicit enough to become canon.
+- **Side Character Activity Update (配角活跃度结算):** Open `03-global-notes.md` and update the Side Character Activity Tracker for any side character who appeared or was mentioned in this chapter.
+- **Check Limit:** If the current chapter equals the `Generation Limit`, stop after the local sync and notify the user that the requested milestone has been met.
+- **Defer Full Review When Needed:** If the generation limit stops before the whole novel is finished, do not enter the full review stage yet. Reserve raw-text review for when all planned chapters are complete. Otherwise, continue to the next chapter.
+
+---
+
+### Stage 4: Final Review & Optimization (终稿审查与回填)
+
+Enter this stage only after **all planned chapters are complete**.
+
+This stage is different from Stage 3. During drafting, notes are the default continuity surface. During final review, notes are only support material. You must read the original `chapter-xx.md` prose itself.
+
+1. **Read Raw Chapter Text:** Read the chapter originals in order. Do not rely on notes alone for final review.
+2. **Audit for Conflicts:** Check time continuity, plot logic, character consistency, POV continuity, foreshadowing setup/payoff, side-character behavior, and all locked constraints.
+3. **Reconcile Canon Files:** Based on the finalized chapter text, revise `00-outline.md`, `01-characters.md`, `02-timeline.md`, `03-global-notes.md`, and every `chapter-xx-notes.md` so they all match the final canon.
+4. **Fix Contradictions Immediately:** If timeline, plot, or character-setting conflicts exist, modify the affected chapter text and the relevant planning/notes files right away. Do not leave known conflicts unresolved.
+5. **Deliver the Final State:** Only after the chapter text and all planning artifacts agree with each other should the project be treated as internally consistent and complete.
