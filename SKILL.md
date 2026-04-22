@@ -47,6 +47,23 @@ Before asking the 7 questions or writing anything, detect whether the user is st
    - Read the planning pack and the most relevant prior notes, determine the next actionable chapter, and continue from there.
    - When resuming review, do not redraft chapters by default. Start from raw-text audit first.
 
+### Stage 0.5: Resume Summary & Confirmation Gate
+
+When Stage 0 detects anything other than a brand-new project, insert a short checkpoint before making large edits.
+
+1. **Show a resume brief before acting:**
+   - Summarize the detected project state in 3-6 lines: project name, current mode (`Planning Ready` / `Draft In Progress` / `Review Ready` / `Broken`), next target chapter or review mode, and any missing or inconsistent files.
+   - State what you are about to do next: continue drafting, repair notes, normalize filenames, or start final review.
+
+2. **Require confirmation for high-impact transitions:**
+   - If the project is `Broken / Partial State`, explicitly ask for confirmation before reconstructing missing planning files, regenerating missing notes, or normalizing duplicate canonical files.
+   - If the project is `Review Ready`, explicitly ask for confirmation before entering Stage 4, because Stage 4 may modify both chapter prose and all planning artifacts.
+   - If multiple candidate novel folders match the user's request, stop and ask the user which one to use. Do not guess.
+
+3. **Skip this checkpoint only in low-risk resume cases:**
+   - If there is exactly one clear project, the planning pack is healthy, the next step is simply "write the next chapter", and no repair or replanning is needed, you may summarize briefly and continue without waiting.
+   - Even in this fast path, still tell the user what chapter you are about to write and which continuity sources you will use.
+
 ### Stage 1: Capture Intent (The 7 Questions)
 
 Use this stage only for a **brand-new project** or when the existing project is missing critical intent. Your goal is to understand exactly what the user wants to write and how they want it written. **Ask the user the following questions interactively, one by one**. Wait for their answer before asking the next question.
@@ -256,6 +273,14 @@ For each chapter, iterate through these three workflow nodes in exact order:
 Enter this stage only after **all planned chapters are complete**.
 
 This stage is different from Stage 3. During drafting, notes are the default continuity surface. During final review, notes are only support material. You must read the original `chapter-xx.md` prose itself.
+
+**Review Checkpoint:**
+Before you begin raw-text audit, show the user a short review brief:
+- total chapters detected
+- whether any conflicts are already known from `02-timeline.md` or notes
+- which files will likely be edited during reconciliation
+
+Ask for explicit confirmation before starting Stage 4 when the project is complete and review is about to rewrite canon files.
 
 1. **Read Raw Chapter Text:** Read the chapter originals in order. Do not rely on notes alone for final review.
 2. **Audit for Conflicts:** Check time continuity, plot logic, character consistency, POV continuity, foreshadowing setup/payoff, side-character behavior, and all locked constraints.
