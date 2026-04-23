@@ -64,6 +64,36 @@ When Stage 0 detects anything other than a brand-new project, insert a short che
    - If there is exactly one clear project, the planning pack is healthy, the next step is simply "write the next chapter", and no repair or replanning is needed, you may summarize briefly and continue without waiting.
    - Even in this fast path, still tell the user what chapter you are about to write and which continuity sources you will use.
 
+### Stage 0.6: Canon Priority & Next-Action Algorithm
+
+When resuming, repairing, drafting, or reviewing, use this exact priority order. This prevents contradictory files from silently steering the work.
+
+1. **Canon source priority:**
+   - Raw chapter text is highest authority for events that have already been drafted.
+   - `chapter-xx-notes.md` is the working continuity surface during drafting, but it must be corrected if it contradicts raw chapter text.
+   - `02-timeline.md` is highest authority for time locks, fixed schedules, and conflict records.
+   - `01-characters.md` is highest authority for stable character facts, routines, voice, and boundaries.
+   - `03-global-notes.md` is highest authority for user preferences, style constraints, taboos, and side-character activity reminders.
+   - `00-outline.md` is the planning roadmap. It can be updated when drafted canon diverges from the plan.
+
+2. **Next chapter detection:**
+   - First read `00-outline.md` for planned chapter order and completion status.
+   - Then list existing `chapter-xx.md` and `chapter-xx-notes.md` files.
+   - If `chapter-N.md` exists and `chapter-N-notes.md` exists, chapter N is complete for drafting purposes.
+   - If `chapter-N.md` exists but `chapter-N-notes.md` is missing or thin, repair notes for chapter N before writing chapter N+1.
+   - If `chapter-N-notes.md` exists but `chapter-N.md` is missing, treat chapter N as incomplete and do not advance to N+1.
+   - The next chapter is the earliest planned chapter whose chapter text is missing or whose notes are not usable.
+
+3. **Notes quality gate before drafting:**
+   - A notes file is usable only if it contains: core event, ending state, time anchor, appearing characters, relationship changes, unresolved questions, and next-chapter handoff.
+   - If any of those fields are missing, update the notes before drafting the next chapter.
+   - If notes and raw prose disagree, correct the notes unless the raw prose itself is being revised during Stage 4.
+
+4. **Conflict handling order:**
+   - If a conflict blocks the next chapter, resolve it before drafting.
+   - If the conflict is only a planning mismatch and the chapter text is already drafted, update `00-outline.md` and notes to match canon.
+   - If the conflict is a true canon contradiction between drafted chapters, defer major rewrites to Stage 4 unless the user explicitly asks to fix it immediately.
+
 ### Stage 1: Capture Intent (The 7 Questions)
 
 Use this stage only for a **brand-new project** or when the existing project is missing critical intent. Your goal is to understand exactly what the user wants to write and how they want it written. **Ask the user the following questions interactively, one by one**. Wait for their answer before asking the next question.
@@ -224,6 +254,7 @@ Once explicitly confirmed, enter a continuous drafting state to sequentially wri
 - Do **not** reread previous chapter prose by default while drafting the next chapter.
 - If notes are missing, too thin, or a contradiction cannot be resolved from notes, selectively inspect the minimum necessary raw chapter text.
 - If context becomes too large or the session risks timing out, fall back to the planning pack plus prior notes only. Notes are the primary continuity surface during drafting.
+- Before choosing a chapter, apply **Stage 0.6** so the next chapter and required note repairs are selected deterministically.
 
 For each chapter, iterate through these three workflow nodes in exact order:
 
