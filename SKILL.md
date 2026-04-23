@@ -20,6 +20,16 @@ This skill helps the user write a compelling, long-form novel by breaking the pr
 
 Before executing any stage, reread `SKILL.md` from the top through the current stage and load the relevant reference templates for that stage. Planning must happen before drafting. Drafting must happen before final review. Do not skip forward or improvise a different order.
 
+### Reference Loading Map
+
+Load only the references needed for the active stage. Do not bulk-read every reference file unless a conflict or review requires it.
+
+- **Planning:** `references/outline-template.md`, `references/character-template.md`, `references/timeline-template.md`, `references/global-notes-template.md`, and `references/plot-structures.md` when structure selection is needed.
+- **Drafting:** `references/chapter-template.md`, `references/chapter-notes-template.md`, `references/chapter-guide.md`, `references/dialogue-writing.md`, and `references/hook-techniques.md`.
+- **Expansion and repair:** `references/content-expansion.md` when a chapter is short; `references/consistency.md` when continuity, character state, or notes repair is needed.
+- **Final review:** `references/quality-checklist.md`, plus raw chapter text and all canon files.
+- **Wordcount:** `scripts/check_chapter_wordcount.py` must be used during drafting QA when chapter length matters.
+
 ### Stage 0: Project State Detection & Resume Gate
 
 Before asking the 7 questions or writing anything, detect whether the user is starting a brand-new novel or continuing an existing project. This check is mandatory.
@@ -217,7 +227,7 @@ Before any chapter is written, you must finish the numbered planning pack:
    - If the user requested to stop at a *specific plot point*, figure out which chapter that plot point occurs in based on the expected pacing.
    - Record exactly when you must stop writing as the `Generation Limit = Chapter X` (or All Chapters).
 
-2. **Draft the Global Plan (`00-outline.md`):** Do not just create a simple synopsis. You must generate a highly detailed **Global Plan** containing ALL chapters. For *each* chapter, you MUST include:
+2. **Draft the Global Plan (`00-outline.md`):** Use `references/outline-template.md` as the base. Do not just create a simple synopsis. You must generate a highly detailed **Global Plan** containing ALL chapters. For *each* chapter, you MUST include:
    - **Estimated word count**
    - **POV character**
    - **Core events and plot advancement**
@@ -304,6 +314,8 @@ For each chapter, iterate through these three workflow nodes in exact order:
 Enter this stage only after **all planned chapters are complete**.
 
 This stage is different from Stage 3. During drafting, notes are the default continuity surface. During final review, notes are only support material. You must read the original `chapter-xx.md` prose itself.
+
+Use `references/quality-checklist.md` as the review checklist for this stage.
 
 **Review Checkpoint:**
 Before you begin raw-text audit, show the user a short review brief:
