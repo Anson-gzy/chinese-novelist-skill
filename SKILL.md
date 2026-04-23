@@ -330,3 +330,22 @@ Ask for explicit confirmation before starting Stage 4 when the project is comple
 3. **Reconcile Canon Files:** Based on the finalized chapter text, revise `00-outline.md`, `01-characters.md`, `02-timeline.md`, `03-global-notes.md`, and every `chapter-xx-notes.md` so they all match the final canon.
 4. **Fix Contradictions Immediately:** If timeline, plot, or character-setting conflicts exist, modify the affected chapter text and the relevant planning/notes files right away. Do not leave known conflicts unresolved.
 5. **Deliver the Final State:** Only after the chapter text and all planning artifacts agree with each other should the project be treated as internally consistent and complete.
+
+### Stage 5: Milestone Handoff
+
+Use this stage whenever the current session stops before the whole book is complete, or after Stage 4 finishes.
+
+1. **If stopping at a partial Generation Limit:**
+   - Report the last completed chapter and the next planned chapter.
+   - Confirm that `chapter-xx-notes.md`, `00-outline.md`, `02-timeline.md`, and `03-global-notes.md` were updated for the last chapter.
+   - List any open conflicts or unresolved hooks that the next session must carry forward.
+   - Do not run Stage 4 yet.
+
+2. **If the whole book is complete and Stage 4 has run:**
+   - Report that final review is complete.
+   - Summarize any conflicts fixed and any canon files updated.
+   - State whether remaining risks exist. If none are known, say so.
+
+3. **If work stops due to missing information or user pause:**
+   - Leave a concise resume note in the conversation: current project state, next action, and files that must be read next.
+   - Do not invent new plot decisions to bridge the gap.
