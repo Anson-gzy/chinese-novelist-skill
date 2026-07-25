@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "updatedAt": "2026-04-23",
+  "preferences": {
+    "favoriteGenres": ["青春", "悬疑", "成长"],
+    "preferredProtagonist": "",
+    "preferredPerspective": "多视角交叉",
+    "preferredTone": "写实、克制",
+    "typicalChapterCount": 30,
+    "styleReferences": [],
+    "dislikes": ["AI味用词", "生硬转折", "四字成语堆砌"],
+    "creationHistory": ["The Transfer Kid"],
+    "characterBehaviorBans": {
+      "Samira": ["不要把她默认写成一直看手机、刷屏或盯通知；根据场景、情绪和人物日常改用更具体的动作与互动。"]
+    },
+    "subagentConfig": {
+      "routingMode": {
+        "brainAgent": "Gemini 3.1 Pro (High)",
+        "writerAgent": "Claude Opus 4.6"
+      }
+    }
+  }
+}
