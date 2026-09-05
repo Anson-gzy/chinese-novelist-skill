@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "novelName": "novel-title",
+  "projectPath": "/path/to/novel-project",
+  "totalChapters": 20,
+  "language": "zh",
+  "minWordsPerChapter": 3000,
+  "createdAt": "2026-09-05T00:00:00Z",
+  "updatedAt": "2026-09-05T00:00:00Z",
+  "status": "in_progress",
+  "chapters": [
+    {
+      "chapterNumber": 1,
+      "title": "章节标题",
+      "filePath": "chapter-01.md",
+      "notesPath": "chapter-01-notes.md",
+      "status": "completed",
+      "wordCount": 3520,
+      "wordCountPass": true,
+      "retryCount": 0
+    }
+  ]
+}
